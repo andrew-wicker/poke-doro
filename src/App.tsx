@@ -1,11 +1,11 @@
 import './App.css';
-import Timer from './components/Timer';
+import Pokedoro from './components/Pokedoro';
 
 function App() {
   return (
     <>
       <div>
-        <Timer />
+        <Pokedoro />
       </div>
     </>
   );
