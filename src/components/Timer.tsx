@@ -1,33 +1,72 @@
 import { useState, useEffect } from 'react';
 
-const Timer = () => {
-  const [seconds, setSeconds] = useState(25 * 60);
+interface TimerProps {
+  onTimerComplete: () => void;
+  resetDisplay: () => void;
+}
+
+const Timer: React.FC<TimerProps> = ({ onTimerComplete, resetDisplay }) => {
+  const totalTime = 0.25 * 60;
+  const [seconds, setSeconds] = useState(totalTime);
   const [isActive, setIsActive] = useState(false);
+  const [showTimerBall, setShowTimerBall] = useState(true);
+
+  const percentage = (totalTime - seconds) / totalTime;
+  const imageOpacity = 0.5 + percentage * 0.5;
 
   const toggle = () => {
     setIsActive(!isActive);
+    if (!isActive) {
+      setSeconds(totalTime);
+      setShowTimerBall(true);
+    } else {
+      resetDisplay();
+    }
   };
 
   const reset = () => {
-    setSeconds(25 * 60);
+    setSeconds(totalTime);
     setIsActive(false);
+    setShowTimerBall(true);
+    resetDisplay();
   };
 
   useEffect(() => {
     let interval: number | null = null;
 
-    if (isActive) {
+    if (isActive && seconds > 0) {
       interval = window.setInterval(() => {
         setSeconds((seconds) => seconds - 1);
       }, 1000);
-    } else if (!isActive && seconds !== 0) {
-      clearInterval(interval!);
+    } else if (seconds <= 0 && isActive) {
+      setIsActive(false);
+      setShowTimerBall(false);
+      onTimerComplete();
     }
     return () => clearInterval(interval!);
-  }, [isActive, seconds]);
+  }, [isActive, seconds, onTimerComplete, resetDisplay]);
 
   return (
     <div>
+      {showTimerBall && (
+        <div
+          className="image-container"
+          style={{
+            opacity: imageOpacity,
+          }}
+        >
+          <img
+            src="/images/timerball.png"
+            alt="Progress"
+            style={{
+              objectFit: 'cover',
+              width: '50%',
+              height: '50%',
+            }}
+          />
+        </div>
+      )}
+
       <div>
         Time Remaining: {Math.floor(seconds / 60)}:
         {seconds % 60 < 10 ? `0${seconds % 60}` : seconds % 60}
