@@ -9,6 +9,7 @@ const Timer: React.FC<TimerProps> = ({ onTimerComplete, resetDisplay }) => {
   const totalTime = 0.25 * 60;
   const [seconds, setSeconds] = useState(totalTime);
   const [isActive, setIsActive] = useState(false);
+  const [showTimerBall, setShowTimerBall] = useState(true);
 
   const percentage = (totalTime - seconds) / totalTime;
   const imageOpacity = 0.5 + percentage * 0.5;
@@ -17,6 +18,7 @@ const Timer: React.FC<TimerProps> = ({ onTimerComplete, resetDisplay }) => {
     setIsActive(!isActive);
     if (!isActive) {
       setSeconds(totalTime);
+      setShowTimerBall(true);
     } else {
       resetDisplay();
     }
@@ -25,6 +27,7 @@ const Timer: React.FC<TimerProps> = ({ onTimerComplete, resetDisplay }) => {
   const reset = () => {
     setSeconds(totalTime);
     setIsActive(false);
+    setShowTimerBall(true);
     resetDisplay();
   };
 
@@ -37,6 +40,7 @@ const Timer: React.FC<TimerProps> = ({ onTimerComplete, resetDisplay }) => {
       }, 1000);
     } else if (seconds <= 0 && isActive) {
       setIsActive(false);
+      setShowTimerBall(false);
       onTimerComplete();
     }
     return () => clearInterval(interval!);
@@ -44,22 +48,25 @@ const Timer: React.FC<TimerProps> = ({ onTimerComplete, resetDisplay }) => {
 
   return (
     <div>
-      <div
-        className="image-container"
-        style={{
-          opacity: imageOpacity,
-        }}
-      >
-        <img
-          src="/images/timerball.png"
-          alt="Progress"
+      {showTimerBall && (
+        <div
+          className="image-container"
           style={{
-            objectFit: 'cover',
-            width: '50%',
-            height: '50%',
+            opacity: imageOpacity,
           }}
-        />
-      </div>
+        >
+          <img
+            src="/images/timerball.png"
+            alt="Progress"
+            style={{
+              objectFit: 'cover',
+              width: '50%',
+              height: '50%',
+            }}
+          />
+        </div>
+      )}
+
       <div>
         Time Remaining: {Math.floor(seconds / 60)}:
         {seconds % 60 < 10 ? `0${seconds % 60}` : seconds % 60}
