@@ -1,17 +1,30 @@
 import express, { Request, Response, NextFunction } from 'express';
 import 'dotenv/config.js';
-// import mongoose from 'mongoose';
-// import path from 'path';
+import authRouter from './routes/authRouter';
+import session from 'express-session';
+import passport from 'passport';
 
 const server = express();
 const PORT = process.env.PORT || 3000;
 
+server.use(
+  session({
+    secret: 'secret',
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
+server.use(passport.initialize());
+server.use(passport.session());
 
 server.use('/', (req: Request, res: Response) => {
   res.send('request recieved!');
 });
+
+server.use('/auth', authRouter);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 server.use((err: Error, req: Request, res: Response, next: NextFunction) => {
