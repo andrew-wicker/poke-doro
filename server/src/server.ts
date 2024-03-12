@@ -20,14 +20,14 @@ server.use(express.urlencoded({ extended: true }));
 server.use(passport.initialize());
 server.use(passport.session());
 
-server.use('/', (req: Request, res: Response) => {
+server.use('/', (_req: Request, res: Response) => {
   res.send('request recieved!');
 });
 
 server.use('/auth', authRouter);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-server.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+server.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   const defaultErr = {
     log: 'Express error handler caught unknown middleware error',
     status: 500,
