@@ -20,11 +20,11 @@ server.use(express.urlencoded({ extended: true }));
 server.use(passport.initialize());
 server.use(passport.session());
 
+server.use('/auth', authRouter);
+
 server.use('/', (_req: Request, res: Response) => {
   res.send('request recieved!');
 });
-
-server.use('/auth', authRouter);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 server.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {

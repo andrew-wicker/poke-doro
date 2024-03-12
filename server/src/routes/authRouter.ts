@@ -4,7 +4,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import 'dotenv/config';
 
 const GOOGLE_CLIENT_ID: string = process.env.GOOGLE_CLIENT_ID || '';
-const GOOGLE_CLIENT_SECRET: string = process.env.GOOGLE_CLIENT_ID || '';
+const GOOGLE_CLIENT_SECRET: string = process.env.GOOGLE_CLIENT_SECRET || '';
 
 passport.use(
   new GoogleStrategy(
@@ -12,6 +12,10 @@ passport.use(
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
       callbackURL: 'http://localhost:3000/auth/google/callback',
+      scope: [
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile',
+      ],
     },
     async (
       accessToken: string,
