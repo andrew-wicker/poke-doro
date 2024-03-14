@@ -15,6 +15,21 @@ interface Pokemon {
 const PokemonDisplay = () => {
   const [pokemon, setPokemon] = useState<Pokemon | null>(null);
   const [pokemonId, setPokemonId] = useState<number | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/auth/current_user');
+      const data = await response.json();
+      if (data.googleId) {
+        setUserId(data.googleId);
+      } else {
+        console.error('No user ID found');
+      }
+    } catch (error) {
+      console.error('Failed to fetch user info: ', error);
+    }
+  };
 
   useEffect(() => {
     const fetchRandomPokemon = async () => {
@@ -32,7 +47,7 @@ const PokemonDisplay = () => {
         console.error('Failed to fetch Pokemon: ', error);
       }
     };
-
+    fetchCurrentUser();
     fetchRandomPokemon();
   }, []);
 
@@ -43,7 +58,8 @@ const PokemonDisplay = () => {
   }, [pokemon]);
 
   const addPokemonToUser = async (pokemonId: number) => {
-    const userId = '101141148224628755450'; //add userId
+    console.log('fire addPokemonToUser');
+    if (!userId) return;
 
     try {
       const response = await fetch('http://localhost:3000/api/addPokemon', {

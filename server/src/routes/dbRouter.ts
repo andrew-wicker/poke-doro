@@ -5,14 +5,19 @@ import User from '../models/User';
 const dbRouter = express.Router();
 
 dbRouter.post(
-  '/api/addPokemon',
+  '/addPokemon',
   async (req: Request, res: Response, next: NextFunction) => {
+    console.log('addPokemon router');
     const { userId, pokemonId } = req.body;
 
     try {
-      await User.findByIdAndUpdate(userId, {
-        $push: { pokemonIds: pokemonId },
-      });
+      await User.findOneAndUpdate(
+        { googleId: userId },
+        {
+          $push: { pokemonIds: pokemonId },
+        },
+        { new: true }
+      );
       res.status(200).send('Pokemon added successfully');
     } catch (error) {
       console.error('Failed to add Pokemon: ', error);

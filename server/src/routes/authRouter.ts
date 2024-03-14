@@ -49,6 +49,7 @@ passport.use(
           user = await User.create({
             googleId: profile.id,
             displayName: profile.displayName,
+            pokemonIds: [],
           });
         }
 
@@ -56,6 +57,7 @@ passport.use(
         const userObject = {
           id: user.id,
           displayName: user.displayName,
+          pokemonIds: user.pokemonIds,
         };
 
         return done(null, userObject);
@@ -82,6 +84,7 @@ passport.deserializeUser(async (id: string, done) => {
     const userObject = {
       id: user._id.toString(),
       displayName: user.displayName,
+      pokemonIds: user.pokemonIds,
     };
 
     done(null, userObject);
@@ -112,5 +115,17 @@ authRouter.get(
     res.redirect(`http://localhost:5173?token=${token}`);
   }
 );
+
+authRouter.get('/current_user', (req, res) => {
+  if (!req.user) {
+    return res.status(401).send({ error: 'Not authenticated' });
+  } else {
+    const userResponse = {
+      id: req.user.id,
+      displayName: req.user.displayName,
+    };
+    return res.send(userResponse);
+  }
+});
 
 export default authRouter;
