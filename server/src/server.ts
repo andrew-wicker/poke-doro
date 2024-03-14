@@ -5,6 +5,7 @@ import session from 'express-session';
 import passport from 'passport';
 import cors from 'cors';
 import { connectDB } from './models/db';
+import dbRouter from './routes/dbRouter';
 
 const server = express();
 const PORT = process.env.PORT || 3000;
@@ -25,11 +26,12 @@ server.use(passport.session());
 
 server.use('/auth', authRouter);
 
+server.use('/api', dbRouter);
+
 server.use('/home', (_req: Request, res: Response) => {
   res.send('Successfully logged in with Google!');
 });
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 server.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   const defaultErr = {
     log: 'Express error handler caught unknown middleware error',
