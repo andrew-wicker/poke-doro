@@ -2,11 +2,28 @@ import express, { Request, Response } from 'express';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import 'dotenv/config';
+import jwt from 'jsonwebtoken';
+import User from '../models/User';
+
+interface JwtPayload {
+  sub: string;
+  name: string;
+}
+
+declare global {
+  namespace Express {
+    interface User {
+      id: string;
+      displayName: string;
+    }
+  }
+}
 
 const authRouter = express.Router();
 
 const GOOGLE_CLIENT_ID: string = process.env.GOOGLE_CLIENT_ID || '';
 const GOOGLE_CLIENT_SECRET: string = process.env.GOOGLE_CLIENT_SECRET || '';
+const JWT_SECRET: string = process.env.JWT_SECRET || '';
 
 passport.use(
   new GoogleStrategy(
@@ -25,18 +42,52 @@ passport.use(
       profile: any,
       done: any
     ) => {
-      console.log(profile);
-      return done(null, profile);
+      try {
+        let user = await User.findOne({ googleId: profile.id });
+
+        if (!user) {
+          user = await User.create({
+            googleId: profile.id,
+            displayName: profile.displayName,
+          });
+        }
+
+        // create plain JS object literal to work around Mongoose objects
+        const userObject = {
+          id: user.id,
+          displayName: user.displayName,
+        };
+
+        return done(null, userObject);
+      } catch (error) {
+        console.error('Error processing Google Login: ', error);
+        return done(error);
+      }
     }
   )
 );
 
-passport.serializeUser((user, done) => {
-  done(null, user);
+passport.serializeUser((user: any, done) => {
+  done(null, user.id);
 });
 
-passport.deserializeUser((obj: any, done) => {
-  done(null, obj);
+passport.deserializeUser(async (id: string, done) => {
+  try {
+    const user = await User.findById(id).lean();
+
+    if (!user) {
+      return done(null, false);
+    }
+
+    const userObject = {
+      id: user._id.toString(),
+      displayName: user.displayName,
+    };
+
+    done(null, userObject);
+  } catch (error) {
+    done(error);
+  }
 });
 
 authRouter.get(
@@ -48,8 +99,17 @@ authRouter.get(
   '/google/callback',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req: Request, res: Response) => {
-    const userToken = 'user-specific-token';
-    res.redirect(`http://localhost:5173?token=${userToken}`);
+    if (!req.user) {
+      return res.redirect('/login');
+    }
+
+    const payload: JwtPayload = {
+      sub: req.user.id,
+      name: req.user.displayName,
+    };
+
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+    res.redirect(`http://localhost:5173?token=${token}`);
   }
 );
 

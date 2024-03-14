@@ -4,6 +4,7 @@ import authRouter from './routes/authRouter';
 import session from 'express-session';
 import passport from 'passport';
 import cors from 'cors';
+import { connectDB } from './models/db';
 
 const server = express();
 const PORT = process.env.PORT || 3000;
@@ -43,8 +44,10 @@ server.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   return res.status(errorObj.status).json(errorObj.message);
 });
 
-server.listen(PORT || 3001, () => {
-  console.log(`Server listening on port: ${PORT}...`);
+connectDB().then(() => {
+  server.listen(PORT || 3001, () => {
+    console.log(`Server listening on port: ${PORT}...`);
+  });
 });
 
 export default server;
