@@ -117,6 +117,7 @@ authRouter.get(
 );
 
 authRouter.get('/current_user', (req, res) => {
+  console.log(req.user);
   if (!req.user) {
     return res.status(401).send({ error: 'Not authenticated' });
   } else {
