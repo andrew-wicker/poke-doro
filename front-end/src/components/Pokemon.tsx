@@ -53,7 +53,7 @@ const PokemonDisplay = () => {
 
   useEffect(() => {
     if (pokemon) {
-      console.log(pokemon);
+      console.log('useEffect line 54:', pokemon);
     }
   }, [pokemon]);
 
